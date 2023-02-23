@@ -1,0 +1,125 @@
+{
+  "settings": {
+    "analysis": {
+      "char_filter": {
+        "normalize": {
+          "type": "icu_normalizer",
+          "name": "nfkc",
+          "mode": "compose"
+        }
+      },
+      "tokenizer": {
+        "kuromoji_tokenizer": {
+          "mode": "search",
+          "type": "kuromoji_tokenizer",
+          "discard_compound_token": true
+        },
+        "ngram_tokenizer": {
+          "type": "ngram",
+          "min_gram": 1,
+          "max_gram": 1,
+          "token_chars":[
+            "letter",
+            "digit"
+          ]
+        }
+      },
+      "filter": {
+        "char_type_multiplexer": {
+          "type": "multiplexer",
+          "filters": [
+            "hiragana_2_katakana",
+            "katakana_2_hiragana"
+          ]
+        },
+        "hiragana_2_katakana": {
+          "type": "icu_transform",
+          "id": "Hiragana-Katakana"
+        },
+        "katakana_2_hiragana": {
+          "type": "icu_transform",
+          "id": "Katakana-Hiragana" 
+        }
+      },
+      "analyzer": {
+        "kuromoji_analyzer": {
+          "type": "custom",
+          "char_filter": [
+            "normalize"
+          ],
+          "tokenizer": "kuromoji_tokenizer",
+          "filter": [
+            "kuromoji_part_of_speech"
+          ]
+        },
+        "ngram_index_analyzer": {
+          "type": "custom",
+          "char_filter": [
+            "normalize"
+          ],
+          "tokenizer": "ngram_tokenizer",
+          "filter": [
+            "lowercase",
+            "char_type_multiplexer"
+          ]
+        },
+        "ngram_analyzer": {
+          "type": "custom",
+          "char_filter": [
+            "normalize"
+          ],
+          "tokenizer": "ngram_tokenizer",
+          "filter": [
+            "lowercase"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "content": {
+        "type": "text",
+        "term_vector": "with_positions_offsets",
+        "fields": {
+          "ngram": {
+            "type": "text",
+            "term_vector": "with_positions_offsets",
+            "analyzer": "ngram_analyzer",
+            "search_analyzer": "ngram_analyzer"
+          }
+        },
+        "analyzer": "kuromoji_analyzer"
+      },
+      "created": {
+        "type": "keyword"
+      },
+      "member": {
+        "type": "text",
+        "term_vector": "with_positions_offsets",
+        "fields": {
+          "ngram": {
+            "type": "text",
+            "term_vector": "with_positions_offsets",
+            "analyzer": "ngram_analyzer",
+            "search_analyzer": "ngram_analyzer"
+          }
+        },
+        "analyzer": "kuromoji_analyzer"
+      },
+      "title": {
+        "type": "text",
+        "term_vector": "with_positions_offsets",
+        "fields": {
+          "ngram": {
+            "type": "text",
+            "term_vector": "with_positions_offsets",
+            "analyzer": "ngram_analyzer",
+            "search_analyzer": "ngram_analyzer"
+          }
+        },
+        "analyzer": "kuromoji_analyzer"
+      }
+    }
+  }
+}
