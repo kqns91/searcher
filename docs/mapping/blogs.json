@@ -119,6 +119,9 @@
           }
         },
         "analyzer": "kuromoji_analyzer"
+      },
+      "url": {
+        "type": "keyword"
       }
     }
   }

@@ -4,6 +4,8 @@ import json
 import re
 import datetime
 from itertools import count
+import os
+from opensearchpy import OpenSearch
 
 base = 'https://www.nogizaka46.com'
 open_date = '2011.11.11 00:00'
@@ -131,16 +133,40 @@ def get_blog_info(url):
     'title': title,
     'member': name,
     'created': created,
-    'content': content
+    'content': content,
+    'url': url,
   }
 
+def create_client():
+  host = os.environ.get("OPEN_SEARCH_URL")
+  user_name = os.environ.get("USER_NAME")
+  password = os.environ.get("PASSWORD")
+
+  return OpenSearch(
+    hosts = [host],
+    http_compress = True, # enables gzip compression for request bodies
+    http_auth = (user_name, password),
+    use_ssl = True,
+    verify_certs = False,
+    ssl_assert_hostname = False,
+    ssl_show_warn = False,
+)
+
+def index_document(client, data):
+  client.index(
+    index = 'blogs',
+    body = data,
+  )
 
 if __name__ == "__main__":
   blog_list_url = "https://www.nogizaka46.com/s/n46/diary/MEMBER"
   updated_member_urls = get_updated_member_urls(blog_list_url)
 
   if len(updated_member_urls) != 0:
+    client = create_client()
+
     for update_member_url in updated_member_urls:
       new_blog_urls = get_new_blog_urls(update_member_url['url'], update_member_url['latest_checked'])
       for new_blog_url in new_blog_urls:
         data = get_blog_info(new_blog_url)
+        index_document(client, data)
