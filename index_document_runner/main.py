@@ -88,6 +88,39 @@ def get_updated_member_urls(url):
 
   return updated_members_urls
 
+def get_new_blog_urls(url, checked):
+  latest_checked = datetime.datetime.strptime(checked, "%Y.%m.%d %H:%M")
+  urls = []
+
+  for num in count():
+    page_url = url + f"&page={num}"
+    soup = BeautifulSoup(requests.get(page_url).text, "html.parser")
+    if soup == "":
+      return
+
+    for a_tag in soup.find_all('a', attrs={'class', 'hv--thumb'}):
+      created = datetime.datetime.strptime(a_tag.find('p', class_='bl--card__date').text, "%Y.%m.%d %H:%M")
+
+      if created <= latest_checked:
+        return urls
+
+      blog_url =  base + a_tag.get('href')
+      urls.append(blog_url)
+
+    pages = soup.find_all('li', class_='coun')
+    if len(pages) == 0:
+      break
+
+    last_page = int(pages[-1].text)
+    if num+1 >= last_page:
+      break
+
+  return urls
+
 if __name__ == "__main__":
   blog_list_url = "https://www.nogizaka46.com/s/n46/diary/MEMBER"
   updated_member_urls = get_updated_member_urls(blog_list_url)
+
+  if len(updated_member_urls) != 0:
+    for update_member_url in updated_member_urls:
+      new_blog_urls = get_new_blog_urls(update_member_url['url'], update_member_url['latest_checked'])
