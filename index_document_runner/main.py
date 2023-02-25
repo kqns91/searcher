@@ -1,6 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-from dotenv import load_dotenv
 import json
 import re
 import datetime
@@ -117,6 +116,25 @@ def get_new_blog_urls(url, checked):
 
   return urls
 
+def get_blog_info(url):
+  soup = BeautifulSoup(requests.get(url).text, "html.parser")
+  if soup == "":
+    return
+
+  header = soup.find('header', attrs={'class', 'bd--hd'})
+  title = header.find('h1').text
+  created = header.find('p').text
+  name = soup.find('p', class_='bd--prof__name f--head').text
+  content = soup.find('div', attrs={'class', 'bd--edit'}).text
+
+  return {
+    'title': title,
+    'member': name,
+    'created': created,
+    'content': content
+  }
+
+
 if __name__ == "__main__":
   blog_list_url = "https://www.nogizaka46.com/s/n46/diary/MEMBER"
   updated_member_urls = get_updated_member_urls(blog_list_url)
@@ -124,3 +142,5 @@ if __name__ == "__main__":
   if len(updated_member_urls) != 0:
     for update_member_url in updated_member_urls:
       new_blog_urls = get_new_blog_urls(update_member_url['url'], update_member_url['latest_checked'])
+      for new_blog_url in new_blog_urls:
+        data = get_blog_info(new_blog_url)
