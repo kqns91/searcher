@@ -37,5 +37,24 @@ services:
     networks:
       - sandbox
 
+  searcher:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: searcher
+    environment:
+      - OPEN_SEARCH_ADDRESS="https://opensearch:9200"
+      - USER_NAME=${USER_NAME}
+      - PASSWORD=${PASSWORD}
+      - PORT=4646
+    ports:
+      - 4646:4646
+    depends_on:
+      - opensearch
+    volumes:
+      - .:/go/src/app
+    networks:
+      - sandbox
+
 networks:
   sandbox:
