@@ -1,5 +1,18 @@
 package model
 
+// request
+type SearchTemplateRequest struct {
+	ID     string           `json:"id"`
+	Params BlogSearchParams `json:"params"`
+}
+
+type BlogSearchParams struct {
+	Query []string `json:"query"`
+	From  int      `json:"from"`
+	Size  int      `json:"size"`
+}
+
+// response
 type SearchResponse struct {
 	Hits Hits `json:"hits,omitempty"`
 }
@@ -26,15 +39,4 @@ type Source struct {
 	Member  string `json:"member,omitempty"`
 	Created string `json:"created,omitempty"`
 	URL     string `json:"url,omitempty"`
-}
-
-type SearchTemplateRequest struct {
-	ID     string           `json:"id"`
-	Params BlogSearchParams `json:"params"`
-}
-
-type BlogSearchParams struct {
-	Query []string `json:"query"`
-	From  int      `json:"from"`
-	Size  int      `json:"size"`
 }
