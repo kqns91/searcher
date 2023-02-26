@@ -27,7 +27,7 @@ jobs:
           import sys
           
           try:
-              response = requests.get(URL)
+              response = requests.get('${{ env.URL }}')
               response.raise_for_status()
               logging.info('Request sent successfully')
           except Exception:
