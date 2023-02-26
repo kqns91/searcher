@@ -1,0 +1,43 @@
+name: Check Blog Update
+
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: '*/5 * * * *'
+
+env:
+  OPEN_SEARCH_URL: ${{ secrets.OPEN_SEARCH_URL }}
+  USER_NAME: ${{ secrets.USER_NAME }}
+  PASSWORD: ${{ secrets.PASSWORD }}
+
+jobs:
+  check_update:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
+
+    - name: Check for updates
+      run: python main.py
+
+    - name: Commit changes
+      run: |
+        if [[ -n $(git status -s) ]]; then
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add previous.txt
+          git commit -m "Update previous.json"
+          git push
+        fi
