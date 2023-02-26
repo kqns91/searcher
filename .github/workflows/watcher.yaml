@@ -1,43 +1,35 @@
-name: Check Blog Update
-
+name: Index Runner
 on:
   workflow_dispatch:
   # schedule:
-  #   - cron: '*/5 * * * *'
-
-env:
-  OPEN_SEARCH_URL: ${{ secrets.OPEN_SEARCH_URL }}
-  USER_NAME: ${{ secrets.USER_NAME }}
-  PASSWORD: ${{ secrets.PASSWORD }}
-
+  #   - cron: "*/5 * * * *"
 jobs:
-  check_update:
+  request:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-
-    - name: Install dependencies
-      run: |
-        python -m venv venv
-        source venv/bin/activate
-        pip install -r requirements.txt
-
-    - name: Check for updates
-      run: python main.py
-
-    - name: Commit changes
-      run: |
-        if [[ -n $(git status -s) ]]; then
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          git add previous.txt
-          git commit -m "Update previous.json"
-          git push
-        fi
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+      - name: Send request to Example
+        env:
+          URL: ${{ secrets.INDEX_URL }}
+        run: |
+          import requests
+          import logging
+          import traceback
+          import sys
+          
+          try:
+              response = requests.get(URL)
+              response.raise_for_status()
+              logging.info('Request sent successfully')
+          except Exception:
+              logging.error(traceback.format_exc())
+              sys.exit(1)
