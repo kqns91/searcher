@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 handler = logging.StreamHandler()
 handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 # mm.dd HH:MM => YYYY.mm.dd HH:MM
@@ -192,7 +194,8 @@ def index_document(client, data):
     body = data,
   )
 
-async def handle():
+async def handle(request):
+  logger.info(msg='request log')
   blog_list_url = "https://www.nogizaka46.com/s/n46/diary/MEMBER"
 
   try:
@@ -201,6 +204,7 @@ async def handle():
     raise ValueError(f'failed to get_updated_member_urls: {e}')
 
   if len(updated_member_urls) == 0:
+    logger.info(msg='no updated!')
     return web.Response(text='no updated!')
   
   try:
@@ -222,6 +226,7 @@ async def handle():
 
       try:
         index_document(client, data)
+        logger.info(msg=f'new! {data["title"]}')
       except Exception as e:
         raise ValueError(f'failed to index_document: {e}')
 
@@ -234,4 +239,4 @@ if __name__ == "__main__":
   try:
     web.run_app(app, port=14646)
   except Exception as e:
-    logger.error(f'Error: {e}')
+    logger.error(msg=f'Error: {e}')
