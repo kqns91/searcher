@@ -7,9 +7,16 @@ from itertools import count
 import os
 from opensearchpy import OpenSearch
 from aiohttp import web
+import logging
 
 base = 'https://www.nogizaka46.com'
 open_date = '2011.11.11 00:00'
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+handler.setLevel(logging.INFO)
+logger.addHandler(handler)
 
 # mm.dd HH:MM => YYYY.mm.dd HH:MM
 def add_year(date_string):
@@ -26,10 +33,20 @@ def add_year(date_string):
 
     return date_str
 
+def fetch_page(page_url):
+    try:
+        res = requests.get(page_url)
+        res.raise_for_status()
+        soup = BeautifulSoup(res.text, "html.parser")
+    except requests.exceptions.RequestException as e:
+        raise ValueError(f'failed to request: {e}')
+    return soup
+
 def get_updated_member_urls(url):
-  soup = BeautifulSoup(requests.get(url).text, "html.parser")
-  if soup == "":
-    return
+  try:
+    soup = fetch_page(url)
+  except Exception as e:
+    raise ValueError(f'failed to fetch_page: {e}')
 
   members = []
 
@@ -52,8 +69,11 @@ def get_updated_member_urls(url):
 
           members.append(member)
 
-  with open("previous.json", "r") as f:
-    previous = json.loads(f.read())
+  try:
+    with open("previous.json", "r") as f:
+      previous = json.loads(f.read())
+  except Exception as e:
+    raise ValueError(f'failed to loads json: {e}')
 
   updated_members_urls = []
   new_members = []
@@ -91,8 +111,11 @@ def get_updated_member_urls(url):
 
   previous += new_members
 
-  with open("previous.json", "w") as f:
-    json.dump(previous, f, indent=2, ensure_ascii=False)
+  try:
+    with open("previous.json", "w") as f:
+      json.dump(previous, f, indent=2, ensure_ascii=False)
+  except Exception as e:
+    raise ValueError(f'failed to write json: {e}')
 
   return updated_members_urls
 
@@ -102,9 +125,10 @@ def get_new_blog_urls(url, checked):
 
   for num in count():
     page_url = url + f"&page={num}"
-    soup = BeautifulSoup(requests.get(page_url).text, "html.parser")
-    if soup == "":
-      return
+    try:
+      soup = fetch_page(page_url)
+    except Exception as e:
+      raise ValueError(f'failed to fetch_page: {e}')
 
     for a_tag in soup.find_all('a', attrs={'class', 'hv--thumb'}):
       created = datetime.datetime.strptime(a_tag.find('p', class_='bl--card__date').text, "%Y.%m.%d %H:%M")
@@ -126,9 +150,10 @@ def get_new_blog_urls(url, checked):
   return urls
 
 def get_blog_info(url):
-  soup = BeautifulSoup(requests.get(url).text, "html.parser")
-  if soup == "":
-    return
+  try:
+    soup = fetch_page(url)
+  except Exception as e:
+    raise ValueError(f'failed to fetch_page: {e}')
 
   header = soup.find('header', attrs={'class', 'bd--hd'})
   title = header.find('h1').text
@@ -149,7 +174,7 @@ def create_client():
   user_name = os.environ.get("USER_NAME")
   password = os.environ.get("PASSWORD")
 
-  return OpenSearch(
+  client =  OpenSearch(
     hosts = [host],
     http_compress = True, # enables gzip compression for request bodies
     http_auth = (user_name, password),
@@ -157,7 +182,9 @@ def create_client():
     verify_certs = False,
     ssl_assert_hostname = False,
     ssl_show_warn = False,
-)
+  )
+
+  return client
 
 def index_document(client, data):
   client.index(
@@ -165,22 +192,38 @@ def index_document(client, data):
     body = data,
   )
 
-async def handle(request):
+async def handle():
   blog_list_url = "https://www.nogizaka46.com/s/n46/diary/MEMBER"
 
-  updated_member_urls = get_updated_member_urls(blog_list_url)
+  try:
+    updated_member_urls = get_updated_member_urls(blog_list_url)
+  except Exception as e:
+    raise ValueError(f'failed to get_updated_member_urls: {e}')
 
   if len(updated_member_urls) == 0:
     return web.Response(text='no updated!')
   
-  client = create_client()
+  try:
+    client = create_client()
+  except Exception as e:
+    raise ValueError(f'failed to create_client: {e}')
 
   for update_member_url in updated_member_urls:
-    new_blog_urls = get_new_blog_urls(update_member_url['url'], update_member_url['latest_checked'])
+    try:
+      new_blog_urls = get_new_blog_urls(update_member_url['url'], update_member_url['latest_checked'])
+    except Exception as e:
+      raise ValueError(f'failed to get_new_blog_urls: {e}')
 
     for new_blog_url in new_blog_urls:
-      data = get_blog_info(new_blog_url)
-      index_document(client, data)
+      try:
+        data = get_blog_info(new_blog_url)
+      except Exception as e:
+        raise ValueError(f'failed to get_blog_info: {e}')
+
+      try:
+        index_document(client, data)
+      except Exception as e:
+        raise ValueError(f'failed to index_document: {e}')
 
     return web.json_response(new_blog_urls)
 
@@ -188,4 +231,7 @@ app = web.Application()
 app.add_routes([web.get('/index', handle)])
 
 if __name__ == "__main__":
-  web.run_app(app, port=14646)
+  try:
+    web.run_app(app, port=14646)
+  except Exception as e:
+    logger.error(f'Error: {e}')
