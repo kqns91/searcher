@@ -21,6 +21,7 @@ jobs:
         env:
           URL: ${{ secrets.INDEX_URL }}
         run: |
+          python - <<EOF
           import requests
           import logging
           import traceback
