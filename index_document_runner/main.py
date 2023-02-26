@@ -55,13 +55,14 @@ def get_updated_member_urls(url):
     previous = json.loads(f.read())
 
   updated_members_urls = []
+  new_members = []
 
   for _member in members:
     _name = _member['name']
     _update_time = _member['update_time']
     _blog_url = _member['blog_url']
 
-    for member in previous:
+    for i, member in enumerate(previous):
       name = member['name']
       update_time = member['update_time']
 
@@ -75,6 +76,8 @@ def get_updated_member_urls(url):
         }
 
         updated_members_urls.append(blog_info)
+        previous[i]['update_time'] = _update_time
+
         break
     else:
       blog_info = {
@@ -83,9 +86,12 @@ def get_updated_member_urls(url):
       }
 
       updated_members_urls.append(blog_info)
+      new_members.append(_member)
+
+  previous += new_members
 
   with open("previous.json", "w") as f:
-    json.dump(members, f, indent=2, ensure_ascii=False)
+    json.dump(previous, f, indent=2, ensure_ascii=False)
 
   return updated_members_urls
 
