@@ -6,6 +6,7 @@ import datetime
 from itertools import count
 import os
 from opensearchpy import OpenSearch
+from aiohttp import web
 
 base = 'https://www.nogizaka46.com'
 open_date = '2011.11.11 00:00'
@@ -164,15 +165,27 @@ def index_document(client, data):
     body = data,
   )
 
-if __name__ == "__main__":
+async def handle(request):
   blog_list_url = "https://www.nogizaka46.com/s/n46/diary/MEMBER"
+
   updated_member_urls = get_updated_member_urls(blog_list_url)
 
-  if len(updated_member_urls) != 0:
-    client = create_client()
+  if len(updated_member_urls) == 0:
+    return web.Response(text='no updated!')
+  
+  client = create_client()
 
-    for update_member_url in updated_member_urls:
-      new_blog_urls = get_new_blog_urls(update_member_url['url'], update_member_url['latest_checked'])
-      for new_blog_url in new_blog_urls:
-        data = get_blog_info(new_blog_url)
-        index_document(client, data)
+  for update_member_url in updated_member_urls:
+    new_blog_urls = get_new_blog_urls(update_member_url['url'], update_member_url['latest_checked'])
+
+    for new_blog_url in new_blog_urls:
+      data = get_blog_info(new_blog_url)
+      index_document(client, data)
+
+    return web.json_response(new_blog_urls)
+
+app = web.Application()
+app.add_routes([web.get('/index', handle)])
+
+if __name__ == "__main__":
+  web.run_app(app, port=14646)
