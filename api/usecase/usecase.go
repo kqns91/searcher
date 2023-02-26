@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strconv"
 
 	"github.com/kqns91/searcher/api/model"
@@ -54,12 +55,27 @@ func (u *ucase) Search(ctx context.Context, query string, from, size string) (*m
 	blogs := []*model.Blog{}
 
 	for _, h := range sr.Hits.Hits {
+		highlight := []string{}
+
+		keys := make([]string, 0, len(h.Highlight))
+		for k := range h.Highlight {
+			keys = append(keys, k)
+		}
+
+		sort.Slice(keys, func(i, j int) bool {
+			return keys[i] < keys[j]
+		})
+
+		for _, k := range keys {
+			highlight = append(highlight, h.Highlight[k]...)
+		}
+
 		blogs = append(blogs, &model.Blog{
 			Title:     h.Source.Title,
 			Member:    h.Source.Member,
 			Created:   h.Source.Created,
 			URL:       h.Source.URL,
-			Highlight: h.Highlight["content"],
+			Highlight: highlight,
 		})
 	}
 
