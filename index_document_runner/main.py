@@ -172,11 +172,11 @@ def get_blog_info(url):
   }
 
 def create_client():
-  host = os.environ.get("OPEN_SEARCH_URL")
+  host = os.environ.get("OPEN_SEARCH_ADDRESS")
   user_name = os.environ.get("USER_NAME")
   password = os.environ.get("PASSWORD")
 
-  client =  OpenSearch(
+  return OpenSearch(
     hosts = [host],
     http_compress = True, # enables gzip compression for request bodies
     http_auth = (user_name, password),
@@ -185,8 +185,6 @@ def create_client():
     ssl_assert_hostname = False,
     ssl_show_warn = False,
   )
-
-  return client
 
 def index_document(client, data):
   client.index(
