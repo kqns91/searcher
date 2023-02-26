@@ -71,6 +71,8 @@ services:
       - 14646:14646
     depends_on:
       - opensearch
+    volumes:
+      - ./index_document_runner:/app
     networks:
       - sandbox
 
