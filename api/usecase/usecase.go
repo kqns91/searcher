@@ -10,7 +10,7 @@ import (
 )
 
 type Usecase interface {
-	Search(ctx context.Context, query string, from, size string) (*model.SearchResponse, error)
+	Search(ctx context.Context, query string, from, size string) (*model.Response, error)
 }
 
 type ucase struct {
@@ -23,9 +23,9 @@ func New(repo repository.OpenSearchRepository) Usecase {
 	}
 }
 
-func (u *ucase) Search(ctx context.Context, query string, from, size string) (*model.SearchResponse, error) {
+func (u *ucase) Search(ctx context.Context, query string, from, size string) (*model.Response, error) {
 	if query == "" {
-		return &model.SearchResponse{}, nil
+		return &model.Response{}, nil
 	}
 
 	var err error
@@ -46,9 +46,26 @@ func (u *ucase) Search(ctx context.Context, query string, from, size string) (*m
 		}
 	}
 
-	res, err := u.search.Search(ctx, []string{"blogs"}, query, f, s)
+	sr, err := u.search.Search(ctx, []string{"blogs"}, query, f, s)
 	if err != nil {
 		return nil, fmt.Errorf("failed to search document: %w", err)
+	}
+
+	blogs := []*model.Blog{}
+
+	for _, h := range sr.Hits.Hits {
+		blogs = append(blogs, &model.Blog{
+			Title:     h.Source.Title,
+			Member:    h.Source.Member,
+			Created:   h.Source.Created,
+			URL:       h.Source.URL,
+			Highlight: h.Highlight["content"],
+		})
+	}
+
+	res := &model.Response{
+		Total: sr.Hits.Total.Value,
+		Blogs: blogs,
 	}
 
 	return res, nil
