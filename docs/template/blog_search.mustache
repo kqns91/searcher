@@ -6,8 +6,6 @@
           "simple_query_string": {
             "query": "{{#query}}\"{{.}}\"{{/query}}",
             "fields": [
-              "title",
-              "title.ngram",
               "content",
               "content.ngram"
             ]
@@ -25,19 +23,14 @@
   ],
   "highlight": {
     "fields": {
-      "title": {
-        "matched_fields": [
-          "title",
-          "title.ngram"
-        ], 
-        "type":"fvh"
-      },
       "content": {
         "matched_fields": [
           "content",
           "content.ngram"
         ], 
-        "type":"fvh"
+        "type":"fvh",
+        "fragment_size": 50,
+        "number_of_fragments": 1
       }
     }
   },
