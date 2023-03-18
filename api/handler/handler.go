@@ -11,7 +11,8 @@ import (
 )
 
 type Handler interface {
-	Search(ctx context.Context, c *gin.Context) error
+	SearchBlogs(ctx context.Context, c *gin.Context) error
+	SearchComments(ctx context.Context, c *gin.Context) error
 }
 
 type httpHandler struct {
@@ -30,7 +31,8 @@ func SetRouteFunc(handler Handler) func(*gin.Engine) *gin.Engine {
 			fn     func(c *gin.Context)
 			method string
 		}{
-			"/documents/search": {fn: fn(handler.Search), method: http.MethodGet},
+			"/blogs/search":    {fn: fn(handler.SearchBlogs), method: http.MethodGet},
+			"/comments/search": {fn: fn(handler.SearchComments), method: http.MethodGet},
 		}
 
 		api := engine.Group("/api")
@@ -63,10 +65,21 @@ func handleError(ctx context.Context, c *gin.Context, err error) {
 	)
 }
 
-func (h *httpHandler) Search(ctx context.Context, c *gin.Context) error {
-	res, err := h.uc.Search(ctx, c.Query("query"), c.Query("from"), c.Query("size"))
+func (h *httpHandler) SearchBlogs(ctx context.Context, c *gin.Context) error {
+	res, err := h.uc.Search(ctx, "blogs", c.Query("query"), c.Query("from"), c.Query("size"))
 	if err != nil {
-		return fmt.Errorf("failed to search: %w", err)
+		return fmt.Errorf("failed to search blogs: %w", err)
+	}
+
+	c.JSON(http.StatusOK, res)
+
+	return nil
+}
+
+func (h *httpHandler) SearchComments(ctx context.Context, c *gin.Context) error {
+	res, err := h.uc.Search(ctx, "comments", c.Query("query"), c.Query("from"), c.Query("size"))
+	if err != nil {
+		return fmt.Errorf("failed to search comments: %w", err)
 	}
 
 	c.JSON(http.StatusOK, res)

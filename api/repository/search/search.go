@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"regexp"
 
@@ -27,8 +28,23 @@ func New(client *opensearchv2.Client) repository.OpenSearchRepository {
 func (o *osearch) Search(ctx context.Context, index []string, query string, from, size int) (*model.SearchResponse, error) {
 	words := regexp.MustCompile(` |　`).Split(query, -1)
 
+	if len(index) != 1 {
+		return nil, errors.New("length of index is invalid")
+	}
+
+	template := ""
+
+	switch index[0] {
+	case "blogs":
+		template = "blog_search"
+	case "comments":
+		template = "comment_search"
+	default:
+		return nil, errors.New("unexported index")
+	}
+
 	body, err := json.Marshal(model.SearchTemplateRequest{
-		ID: "blog_search",
+		ID: template,
 		Params: model.BlogSearchParams{
 			Query: words,
 			From:  from,
