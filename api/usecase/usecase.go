@@ -11,7 +11,7 @@ import (
 )
 
 type Usecase interface {
-	Search(ctx context.Context, query string, from, size string) (*model.Response, error)
+	Search(ctx context.Context, index string, query string, from, size string) (*model.Response, error)
 }
 
 type ucase struct {
@@ -24,7 +24,7 @@ func New(repo repository.OpenSearchRepository) Usecase {
 	}
 }
 
-func (u *ucase) Search(ctx context.Context, query string, from, size string) (*model.Response, error) {
+func (u *ucase) Search(ctx context.Context, index string, query string, from, size string) (*model.Response, error) {
 	if query == "" {
 		return &model.Response{}, nil
 	}
@@ -47,43 +47,59 @@ func (u *ucase) Search(ctx context.Context, query string, from, size string) (*m
 		}
 	}
 
-	sr, err := u.search.Search(ctx, []string{"blogs"}, query, f, s)
+	switch index {
+	case "blogs", "comments":
+	default:
+		return &model.Response{}, nil
+	}
+
+	// commentsも検索できるようにする。
+	sr, err := u.search.Search(ctx, []string{index}, query, f, s)
 	if err != nil {
 		return nil, fmt.Errorf("failed to search document: %w", err)
 	}
 
-	blogs := []*model.Blog{}
+	result := []any{}
 
 	for _, h := range sr.Hits.Hits {
 		highlight := []string{}
 
 		keys := make([]string, 0, len(h.Highlight))
+
 		for k := range h.Highlight {
 			keys = append(keys, k)
 		}
 
-		sort.Slice(keys, func(i, j int) bool {
-			return keys[i] < keys[j]
-		})
+		sort.Strings(keys)
 
 		for _, k := range keys {
 			highlight = append(highlight, h.Highlight[k]...)
 		}
 
-		blogs = append(blogs, &model.Blog{
-			ArtiCode:  h.Source.ArtiCode,
-			Title:     h.Source.Title,
-			Member:    h.Source.Member,
-			Date:      h.Source.Date,
-			Link:      h.Source.Link,
-			Images:    h.Source.Images,
-			Highlight: highlight,
-		})
+		switch index {
+		case "blogs":
+			result = append(result, &model.Blog{
+				ArtiCode:  h.Source.ArtiCode,
+				Title:     h.Source.Title,
+				Member:    h.Source.Member,
+				Date:      h.Source.Date,
+				Link:      h.Source.Link,
+				Images:    h.Source.Images,
+				Highlight: highlight,
+			})
+		case "comments":
+			result = append(result, &model.Comment{
+				Comment1:  h.Source.Comment1,
+				Date:      h.Source.Date,
+				KijiCode:  h.Source.KijiCode,
+				Highlight: highlight,
+			})
+		}
 	}
 
 	res := &model.Response{
-		Total: sr.Hits.Total.Value,
-		Blogs: blogs,
+		Total:  sr.Hits.Total.Value,
+		Result: result,
 	}
 
 	return res, nil
