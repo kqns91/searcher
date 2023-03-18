@@ -71,10 +71,12 @@ func (u *ucase) Search(ctx context.Context, query string, from, size string) (*m
 		}
 
 		blogs = append(blogs, &model.Blog{
+			ArtiCode:  h.Source.ArtiCode,
 			Title:     h.Source.Title,
 			Member:    h.Source.Member,
-			Created:   h.Source.Created,
-			URL:       h.Source.URL,
+			Date:      h.Source.Date,
+			Link:      h.Source.Link,
+			Images:    h.Source.Images,
 			Highlight: highlight,
 		})
 	}
