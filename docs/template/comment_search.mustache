@@ -1,0 +1,50 @@
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "simple_query_string": {
+            "query": "{{#query}}\"{{.}}\"{{/query}}",
+            "fields": [
+              "body",
+              "body.ngram"
+            ]
+          }
+        }
+      ],
+      "minimum_should_match": 1
+    }
+  },
+  "_source": [
+    "comment1",
+    "date",
+    "kijicode"
+  ],
+  "highlight": {
+    "fields": {
+      "body": {
+        "matched_fields": [
+          "body",
+          "body.ngram"
+        ], 
+        "type":"fvh",
+        "fragment_size": 50,
+        "number_of_fragments": 2
+      }
+    }
+  },
+  "sort": [
+    {
+      "_score": {
+        "order": "desc"
+      }
+    },
+    {
+      "date": {
+        "order": "desc"
+      }
+    },
+  ],
+  "from": {{from}},
+  "size": {{size}}
+}
