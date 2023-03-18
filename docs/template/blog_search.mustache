@@ -6,8 +6,8 @@
           "simple_query_string": {
             "query": "{{#query}}\"{{.}}\"{{/query}}",
             "fields": [
-              "content",
-              "content.ngram"
+              "text",
+              "text.ngram"
             ]
           }
         }
@@ -16,21 +16,23 @@
     }
   },
   "_source": [
+    "arti_code",
     "title",
     "member",
-    "created",
-    "url"
+    "date",
+    "link",
+    "images"
   ],
   "highlight": {
     "fields": {
-      "content": {
+      "text": {
         "matched_fields": [
-          "content",
-          "content.ngram"
+          "text",
+          "text.ngram"
         ], 
         "type":"fvh",
         "fragment_size": 50,
-        "number_of_fragments": 1
+        "number_of_fragments": 2
       }
     }
   },

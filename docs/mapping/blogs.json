@@ -78,20 +78,26 @@
   },
   "mappings": {
     "properties": {
-      "content": {
-        "type": "text",
-        "term_vector": "with_positions_offsets",
-        "fields": {
-          "ngram": {
-            "type": "text",
-            "term_vector": "with_positions_offsets",
-            "analyzer": "ngram_analyzer",
-            "search_analyzer": "ngram_analyzer"
-          }
-        },
-        "analyzer": "kuromoji_analyzer"
+      "arti_code": {
+        "type": "keyword"
       },
-      "created": {
+      "cate": {
+        "type": "keyword"
+      },
+      "code": {
+        "type": "keyword"
+      },
+      "date": {
+        "type": "date",
+        "format": "yyyy/MM/dd HH:mm:ss||yyyy/MM/dd||epoch_millis"
+      },
+      "end_time": {
+        "type": "keyword"
+      },
+      "images": {
+        "type": "keyword"
+      },
+      "link": {
         "type": "keyword"
       },
       "member": {
@@ -101,7 +107,23 @@
           "ngram": {
             "type": "text",
             "term_vector": "with_positions_offsets",
-            "analyzer": "ngram_analyzer",
+            "analyzer": "ngram_index_analyzer",
+            "search_analyzer": "ngram_analyzer"
+          }
+        },
+        "analyzer": "kuromoji_analyzer"
+      },
+      "start_time": {
+        "type": "keyword"
+      },
+      "text": {
+        "type": "text",
+        "term_vector": "with_positions_offsets",
+        "fields": {
+          "ngram": {
+            "type": "text",
+            "term_vector": "with_positions_offsets",
+            "analyzer": "ngram_index_analyzer",
             "search_analyzer": "ngram_analyzer"
           }
         },
@@ -114,14 +136,11 @@
           "ngram": {
             "type": "text",
             "term_vector": "with_positions_offsets",
-            "analyzer": "ngram_analyzer",
+            "analyzer": "ngram_index_analyzer",
             "search_analyzer": "ngram_analyzer"
           }
         },
         "analyzer": "kuromoji_analyzer"
-      },
-      "url": {
-        "type": "keyword"
       }
     }
   }
