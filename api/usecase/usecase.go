@@ -92,6 +92,7 @@ func (u *ucase) Search(ctx context.Context, index string, query string, from, si
 				Comment1:  h.Source.Comment1,
 				Date:      h.Source.Date,
 				KijiCode:  h.Source.KijiCode,
+				Body:      h.Source.Body,
 				Highlight: highlight,
 			})
 		}

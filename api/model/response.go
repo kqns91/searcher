@@ -19,5 +19,6 @@ type Comment struct {
 	Comment1  string   `json:"comment1"`
 	Date      string   `json:"date"`
 	KijiCode  string   `json:"kijicode"`
+	Body      string   `json:"body"`
 	Highlight []string `json:"highlight"`
 }

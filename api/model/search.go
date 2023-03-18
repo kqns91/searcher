@@ -43,4 +43,5 @@ type Source struct {
 	Images   []string `json:"images,omitempty"`
 	Comment1 string   `json:"comment1,omitempty"`
 	KijiCode string   `json:"kijicode,omitempty"`
+	Body     string   `json:"body,omitempty"`
 }
