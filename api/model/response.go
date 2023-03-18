@@ -6,9 +6,11 @@ type Response struct {
 }
 
 type Blog struct {
+	ArtiCode  string   `json:"arti_code"`
 	Title     string   `json:"title"`
 	Member    string   `json:"member"`
-	Created   string   `json:"created"`
-	URL       string   `json:"url"`
+	Date      string   `json:"date"`
+	Link      string   `json:"link"`
+	Images    []string `json:"images"`
 	Highlight []string `json:"highlight"`
 }

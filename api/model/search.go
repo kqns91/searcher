@@ -35,8 +35,10 @@ type Hit struct {
 }
 
 type Source struct {
-	Title   string `json:"title,omitempty"`
-	Member  string `json:"member,omitempty"`
-	Created string `json:"created,omitempty"`
-	URL     string `json:"url,omitempty"`
+	ArtiCode string   `json:"arti_code,omitempty"`
+	Title    string   `json:"title,omitempty"`
+	Member   string   `json:"member,omitempty"`
+	Date     string   `json:"date,omitempty"`
+	Link     string   `json:"link,omitempty"`
+	Images   []string `json:"images,omitempty"`
 }
