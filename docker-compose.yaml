@@ -57,24 +57,5 @@ services:
     networks:
       - sandbox
 
-  indexer:
-    env_file: ./.env
-    build:
-      context: ./index_document_runner
-      dockerfile: Dockerfile
-    container_name: indexer
-    environment:
-      OPEN_SEARCH_ADDRESS: "https://opensearch:9200"
-      USER_NAME: ${USER_NAME}
-      PASSWORD: ${PASSWORD}
-    ports:
-      - 14646:14646
-    depends_on:
-      - opensearch
-    volumes:
-      - ./index_document_runner:/app
-    networks:
-      - sandbox
-
 networks:
   sandbox:
