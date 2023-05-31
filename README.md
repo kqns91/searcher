@@ -1,5 +1,11 @@
 # searcher
 
+検索アプリのAPIです。
+
+## 構成図
+
+![](./docs/architecture.png)
+
 ## templateの登録および更新
 
 ```
