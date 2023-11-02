@@ -6,6 +6,7 @@ type Response struct {
 }
 
 type Blog struct {
+	ID        string   `json:"id"`
 	ArtiCode  string   `json:"arti_code"`
 	Title     string   `json:"title"`
 	Member    string   `json:"member"`
@@ -16,6 +17,7 @@ type Blog struct {
 }
 
 type Comment struct {
+	ID        string   `json:"id"`
 	Comment1  string   `json:"comment1"`
 	Date      string   `json:"date"`
 	KijiCode  string   `json:"kijicode"`

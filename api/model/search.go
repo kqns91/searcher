@@ -29,6 +29,7 @@ type Total struct {
 }
 
 type Hit struct {
+	ID        string              `json:"_id,omitempty"`
 	Score     float64             `json:"_score,omitempty"`
 	Source    Source              `json:"_source,omitempty"`
 	Highlight map[string][]string `json:"highlight,omitempty"`

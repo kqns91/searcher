@@ -79,6 +79,7 @@ func (u *ucase) Search(ctx context.Context, index string, query string, from, si
 		switch index {
 		case "blogs":
 			result = append(result, &model.Blog{
+				ID:        h.ID,
 				ArtiCode:  h.Source.ArtiCode,
 				Title:     h.Source.Title,
 				Member:    h.Source.Member,
@@ -89,6 +90,7 @@ func (u *ucase) Search(ctx context.Context, index string, query string, from, si
 			})
 		case "comments":
 			result = append(result, &model.Comment{
+				ID:        h.ID,
 				Comment1:  h.Source.Comment1,
 				Date:      h.Source.Date,
 				KijiCode:  h.Source.KijiCode,
