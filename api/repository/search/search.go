@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"regexp"
 
 	opensearchv2 "github.com/opensearch-project/opensearch-go/v2"
@@ -66,6 +67,15 @@ func (o *osearch) Search(ctx context.Context, index []string, query string, from
 	}
 
 	defer res.Body.Close()
+
+	if res.StatusCode >= 400 {
+		b, err := io.ReadAll(res.Body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read response: %w", err)
+		}
+
+		return nil, fmt.Errorf("failed to execute open search request: %s", b)
+	}
 
 	var v model.SearchResponse
 
