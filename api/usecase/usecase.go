@@ -12,6 +12,7 @@ import (
 
 type Usecase interface {
 	Search(ctx context.Context, index string, query string, from, size string) (*model.Response, error)
+	ListBlogs(ctx context.Context, from, size string) (*model.Response, error)
 }
 
 type ucase struct {
@@ -102,6 +103,52 @@ func (u *ucase) Search(ctx context.Context, index string, query string, from, si
 
 	res := &model.Response{
 		Total:  sr.Hits.Total.Value,
+		Result: result,
+	}
+
+	return res, nil
+}
+
+func (u *ucase) ListBlogs(ctx context.Context, from, size string) (*model.Response, error) {
+	var err error
+	f := 0
+	s := 30
+
+	if from != "" {
+		f, err = strconv.Atoi(from)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert from: %w", err)
+		}
+	}
+
+	if size != "" {
+		s, err = strconv.Atoi(size)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert size: %w", err)
+		}
+	}
+
+	blogs, err := u.search.ListBlogs(ctx, f, s)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get blogs: %w", err)
+	}
+
+	result := []any{}
+
+	for _, h := range blogs.Hits.Hits {
+		result = append(result, &model.Blog{
+			ID:       h.ID,
+			ArtiCode: h.Source.ArtiCode,
+			Title:    h.Source.Title,
+			Member:   h.Source.Member,
+			Date:     h.Source.Date,
+			Link:     h.Source.Link,
+			Images:   h.Source.Images,
+		})
+	}
+
+	res := &model.Response{
+		Total:  blogs.Hits.Total.Value,
 		Result: result,
 	}
 

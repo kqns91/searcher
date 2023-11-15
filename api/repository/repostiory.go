@@ -8,4 +8,5 @@ import (
 
 type OpenSearchRepository interface {
 	Search(ctx context.Context, index []string, query string, from, size int) (*model.SearchResponse, error)
+	ListBlogs(ctx context.Context, from, size int) (*model.SearchResponse, error)
 }

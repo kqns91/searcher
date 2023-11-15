@@ -86,3 +86,46 @@ func (o *osearch) Search(ctx context.Context, index []string, query string, from
 
 	return &v, nil
 }
+
+func (o *osearch) ListBlogs(ctx context.Context, from, size int) (*model.SearchResponse, error) {
+	body, err := json.Marshal(model.SearchTemplateRequest{
+		ID: "blog_list",
+		Params: model.BlogSearchParams{
+			From: from,
+			Size: size,
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal: %w", err)
+	}
+
+	req := opensearchapi.SearchTemplateRequest{
+		Index: []string{"blogs"},
+		Body:  bytes.NewReader(body),
+	}
+
+	res, err := req.Do(ctx, o.client)
+	if err != nil {
+		return nil, fmt.Errorf("failed to search document: %w", err)
+	}
+
+	defer res.Body.Close()
+
+	if res.StatusCode >= 400 {
+		b, err := io.ReadAll(res.Body)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read response: %w", err)
+		}
+
+		return nil, fmt.Errorf("failed to execute open search request: %s", b)
+	}
+
+	var v model.SearchResponse
+
+	err = json.NewDecoder(res.Body).Decode(&v)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode: %w", err)
+	}
+
+	return &v, nil
+}

@@ -12,6 +12,7 @@ import (
 
 type Handler interface {
 	SearchBlogs(ctx context.Context, c *gin.Context) error
+	ListBlogs(ctx context.Context, c *gin.Context) error
 	SearchComments(ctx context.Context, c *gin.Context) error
 }
 
@@ -31,6 +32,7 @@ func SetRouteFunc(handler Handler) func(*gin.Engine) *gin.Engine {
 			fn     func(c *gin.Context)
 			method string
 		}{
+			"/blogs":           {fn: fn(handler.ListBlogs), method: http.MethodGet},
 			"/blogs/search":    {fn: fn(handler.SearchBlogs), method: http.MethodGet},
 			"/comments/search": {fn: fn(handler.SearchComments), method: http.MethodGet},
 		}
@@ -63,6 +65,17 @@ func handleError(ctx context.Context, c *gin.Context, err error) {
 			"error_message": err.Error(),
 		},
 	)
+}
+
+func (h *httpHandler) ListBlogs(ctx context.Context, c *gin.Context) error {
+	res, err := h.uc.ListBlogs(ctx, c.Query("from"), c.Query("size"))
+	if err != nil {
+		return fmt.Errorf("failed to get blogs: %w", err)
+	}
+
+	c.JSON(http.StatusOK, res)
+
+	return nil
 }
 
 func (h *httpHandler) SearchBlogs(ctx context.Context, c *gin.Context) error {
